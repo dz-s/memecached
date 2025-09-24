@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'memecached'
+    static_configs:
+      - targets: ['memecached:9100']
+
+rule_files:
+  - "alerts.yml"

@@ -1,0 +1,25 @@
+{
+  "annotations": { "list": [] },
+  "panels": [
+    {
+      "type": "gauge",
+      "title": "Memory Usage (%)",
+      "targets":[{"expr":"app_memory_usage_percent"}],
+      "fieldConfig":{"defaults":{"unit":"percent"}},
+      "options":{"min":0,"max":100,"thresholds":{"steps":[{"color":"green","value":0},{"color":"orange","value":70},{"color":"red","value":90}]}}
+    },
+    {
+      "type":"timeseries",
+      "title":"HTTP Requests",
+      "targets":[{"expr":"rate(app_http_requests_total[1m])"}]
+    },
+    {
+      "type":"timeseries",
+      "title":"Errors",
+      "targets":[{"expr":"rate(app_errors_total[1m])"}]
+    }
+  ],
+  "title":"Memecached App Dashboard",
+  "schemaVersion":36,
+  "version":1
+}

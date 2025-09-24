@@ -1,0 +1,11 @@
+groups:
+  - name: memecached.rules
+    rules:
+      - alert: HighMemoryUsage
+        expr: app_memory_usage_percent > 75
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage in memecached"
+          description: "Memory usage > 75% of limit."
