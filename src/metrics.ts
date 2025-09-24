@@ -1,6 +1,7 @@
 import express from "express";
 import client from "prom-client";
 import fs from "fs";
+import logger from './logger';
 
 const register = new client.Registry();
 client.collectDefaultMetrics({ register });
@@ -70,6 +71,6 @@ export function startMetricsServer(port = 9100) {
   });
 
   app.listen(port, () => {
-    console.log(`Metrics server running at http://localhost:${port}/metrics`);
+    logger.info(`Metrics server running at http://localhost:${port}/metrics`);
   });
 }

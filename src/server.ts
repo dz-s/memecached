@@ -1,5 +1,6 @@
 import { startMetricsServer, countRequest, countError } from "./metrics";
 import { createServer } from "http";
+import logger from './logger';
 
 const PORT = 3000;
 startMetricsServer(9100);
@@ -19,5 +20,5 @@ const server = createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`App running at http://localhost:${PORT}`);
+  logger.info(`App running at http://localhost:${PORT}`);
 });
