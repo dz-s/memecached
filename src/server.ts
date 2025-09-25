@@ -5,7 +5,7 @@ import { getConfig } from './config';
 import { CacheStrategy } from './types';
 
 import { createCache } from './create-cache';
-import { countRequest, startMetricsServer } from './metrics';
+import { countRequest, observeRequestDuration, startMetricsServer } from './metrics';
 
 class CacheServer {
   private server: net.Server;
@@ -32,12 +32,11 @@ class CacheServer {
       buffer += data.toString();
       
       let lines = buffer.split('\n');
-      buffer = lines.pop() || ''; // Keep incomplete line in buffer
+      buffer = lines.pop() || ''; 
 
       for (const line of lines) {
-        const command = line.replace('\r', '').trim();
+        const command = line.replace(/\r$/, '').trim();
         if (command) {
-          countRequest()
           this.processCommand(socket, command);
         }
       }
@@ -49,23 +48,30 @@ class CacheServer {
     });
 
     socket.on('error', (error) => {
-      console.error(`Socket error from ${socket.remoteAddress}:${socket.remotePort}:`, error.message);
+      logger.error(`Socket error from ${socket.remoteAddress}:${socket.remotePort}:`, error.message);
       this.connections.delete(socket);
+      socket.end()
     });
   }
 
   private processCommand(socket: net.Socket, command: string): void {
+    const start = process.hrtime(); 
+
     const parsedCommand = this.protocol.parse(command);
     const result = this.protocol.execute(parsedCommand)
 
-    if (result.success && result.data === 'QUIT') {
-      socket.write(this.protocol.format(result));
-      socket.end();
+    const diff = process.hrtime(start);
+    const seconds = diff[0] + diff[1] / 1e9;
+    observeRequestDuration(seconds);
+    countRequest()
+
+    if(result.type === 'QUIT'){
+      socket.end(result.data  + '\n' )
       return;
     }
-
+    
     const response = this.protocol.format(result);
-    socket.write(response);
+    socket.write(response + '\n');
   }
 
   private setupGracefulShutdown(): void {
@@ -78,8 +84,8 @@ class CacheServer {
       
       this.server.close(() => {
         logger.info('Server closed');
-        
-        //this.cache.shutdown();
+       
+        //TBD: cache.shutdown();
         logger.info('Cache shutdown complete');
         
         process.exit(0);

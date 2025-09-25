@@ -24,6 +24,17 @@ const errorCounter = new client.Counter({
 });
 register.registerMetric(errorCounter);
 
+const httpRequestDuration = new client.Histogram({
+  name: "app_http_request_duration_seconds",
+  help: "HTTP request duration in seconds",
+  buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10]
+});
+register.registerMetric(httpRequestDuration);
+
+export function observeRequestDuration(seconds: number) {
+  httpRequestDuration.observe(seconds);
+}
+
 export function countRequest() {
   requestCounter.inc();
 }

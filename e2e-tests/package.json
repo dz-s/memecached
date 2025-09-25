@@ -1,0 +1,10 @@
+{
+  "name": "memecached-load-test",
+  "version": "1.0.0",
+  "scripts": {
+    "test:e2e": "mocha e2e-memecached-flow-tests.js"
+  },
+  "devDependencies": {
+    "mocha": "^11.0.0"
+  }
+}

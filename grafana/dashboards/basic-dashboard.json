@@ -4,22 +4,55 @@
     {
       "type": "gauge",
       "title": "Memory Usage (%)",
-      "targets":[{"expr":"app_memory_usage_percent"}],
-      "fieldConfig":{"defaults":{"unit":"percent"}},
-      "options":{"min":0,"max":100,"thresholds":{"steps":[{"color":"green","value":0},{"color":"orange","value":70},{"color":"red","value":90}]}}
+      "targets": [{ "expr": "app_memory_usage_percent" }],
+      "fieldConfig": { "defaults": { "unit": "percent" } },
+      "options": {
+        "min": 0,
+        "max": 100,
+        "thresholds": {
+          "steps": [
+            { "color": "green", "value": 0 },
+            { "color": "orange", "value": 70 },
+            { "color": "red", "value": 90 }
+          ]
+        }
+      },
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 0 }
     },
     {
-      "type":"timeseries",
-      "title":"HTTP Requests",
-      "targets":[{"expr":"rate(app_http_requests_total[1m])"}]
+      "type": "timeseries",
+      "title": "TPS",
+      "targets": [
+        {
+          "expr": "clamp_min(max(increase(app_http_requests_total[15m]),0)/900,0)",
+          "interval": "",
+          "legendFormat": "TPS"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "req/s" } },
+      "options": { "legend": { "displayMode": "list" } },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 6 },
+      "timezone": "Europe/Berlin"
     },
     {
-      "type":"timeseries",
-      "title":"Errors",
-      "targets":[{"expr":"rate(app_errors_total[1m])"}]
+      "type": "timeseries",
+      "title": "Average Latency (ms)",
+      "targets": [
+        {
+          "expr": "clamp_min(((rate(app_http_request_duration_seconds_sum[15m])/rate(app_http_request_duration_seconds_count[15m])) or vector(0)) * 1000,0)",
+          "interval": "",
+          "legendFormat": "Latency"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms" } },
+      "options": { "legend": { "displayMode": "list" } },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
+      "timezone": "Europe/Berlin"
     }
   ],
-  "title":"Memecached App Dashboard",
-  "schemaVersion":36,
-  "version":1
+  "title": "Memecached App Dashboard",
+  "schemaVersion": 36,
+  "version": 3,
+  "time": { "from": "now-1h", "to": "now" },
+  "timezone": "Europe/Berlin"
 }

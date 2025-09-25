@@ -16,7 +16,7 @@ export class Protocol {
             case 'SET': {
                 const args = input.trim().split(' ');
                 if (args.length < 3) {
-                    console.error('SET command requires a key and a value');
+                    logger.error('SET command requires a key and a value');
                     return null;
                 }
 
@@ -59,9 +59,6 @@ export class Protocol {
             case 'KEYS':
                 return { type: 'KEYS' }
 
-            case 'STATS':
-                return { type: 'STATS' }
-
             case 'PING':
                 return { type: 'PING' }
 
@@ -84,49 +81,49 @@ export class Protocol {
                     const success = this.cache.set(command.key, command.value, command.ttl)
                     return {
                         success,
-                        data: success ? 'STORED' : 'NOT_STORED',
-                        error: success ? undefined : 'Failed to store (possibly too large)',
+                        type: command.type,
+                        data: success ? 'STORED' : 'NOT_STORED'
                     }
                 }
 
                 case 'GET': {
                     const value = this.cache.get(command.key)
-                    return { success: true, data: value }
+                    
+                    return value !== null ? { success: true, type: command.type, data: value } : {
+                        success: false,
+                        type: command.type,
+                        data: 'NOT_FOUND'
+                    }
                 }
 
                 case 'DELETE': {
                     const deleted = this.cache.delete(command.key)
-                    return { success: true, data: deleted ? 'DELETED' : 'NOT_FOUND' }
+                    return { success: true, type: command.type, data: deleted ? 'DELETED' : 'NOT_FOUND' }
                 }
 
                 case 'EXISTS': {
                     const exists = this.cache.has(command.key)
-                    return { success: true, data: exists ? 'YES' : 'NO' }
+                    return { success: true, type: command.type, data: exists ? 'YES' : 'NO' }
                 }
 
                 case 'FLUSH':
                     //TBD (snapshot before clear)
-                    return { success: true, data: 'OK' }
+                    return { success: true, type: command.type, data: 'OK' }
 
                 case 'KEYS': {
                     const keys = this.cache.keys()
-                    return { success: true, data: keys.join(';') }
-                }
-
-                case 'STATS': {
-                    //TBD this.cache.getStats()
-                    return { success: true, data: null }
+                    return { success: true, type: command.type, data: keys.join(';') }
                 }
 
                 case 'PING': {
-                    return { success: true, data: 'PONG' }
+                    return { success: true, type: command.type, data: 'PONG' }
                 }
 
                 case 'QUIT':
-                    return { success: true, data: 'QUIT' }
+                    return { success: true, type: command.type, data: 'BYE' }
 
                 default:
-                    return { success: false, data: null, error: 'Failed to parse command' }
+                    return { success: false, type: command.type, data: null, error: 'Failed to parse command' }
             }
         } catch (error) {
             return {
@@ -138,16 +135,9 @@ export class Protocol {
     }
 
     format(result: CommandResult): string {
-        if (!result.success) {
-            return `ERROR ${result.error}`
-        }
-
-        if (result.data === 'QUIT') {
-            return 'BYE'
-        }
 
         if (result.data === null) {
-            return 'NOT_FOUND'
+            return `ERROR ${result.error}`
         }
 
         return result.data
