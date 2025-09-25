@@ -107,6 +107,14 @@ QUIT               # Close connection
 - **Unit tests** business logic
 - **e2e tests** for different scenarious (you can look at the example of report here /e2e-tests/cache_e2e_report.md)
 
+To run **e2e tests** :
+
+```
+cd /e2e-tests
+npm i
+npm run test:e2e
+```
+
 ## 🚀 **Performance Characteristics**
 
 - **Memory efficient**: Precise size tracking
