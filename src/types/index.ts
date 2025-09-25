@@ -43,12 +43,12 @@ export enum EvictionPolicy {
 
 export interface CommandResult {
   readonly success: boolean
-  readonly data?: unknown
+  readonly data: string | null
   readonly error?: string
 }
 
-export type Command<V> = 
-  | { type: 'SET'; key: string; value: V; ttl: number }
+export type Command = 
+  | { type: 'SET'; key: string; value: string; ttl: number }
   | { type: 'GET'; key: string }
   | { type: 'DELETE'; key: string }
   | { type: 'EXISTS'; key: string }
@@ -57,4 +57,5 @@ export type Command<V> =
   | { type: 'STATS' }
   | { type: 'PING' }
   | { type: 'QUIT' }
+  | { type: 'NOT_SUPPORTED'}
 

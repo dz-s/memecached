@@ -5,7 +5,7 @@ import { CacheStrategy } from './types'
 export class Protocol {
     constructor(private readonly cache: CacheStrategy<string>) { }
 
-    parse(input: string): Command<string> | null {
+    parse(input: string): Command | null {
         const trimmed = input.trim()
         if (!trimmed) return null
 
@@ -73,7 +73,7 @@ export class Protocol {
         }
     }
 
-    execute(command: Command<string> | null): CommandResult {
+    execute(command: Command | null): CommandResult {
 
         if (!command) {
             return { success: false, data: null, error: 'Failed to parse command' }
@@ -101,7 +101,7 @@ export class Protocol {
 
                 case 'EXISTS': {
                     const exists = this.cache.has(command.key)
-                    return { success: true, data: exists ? 1 : 0 }
+                    return { success: true, data: exists ? 'YES' : 'NO' }
                 }
 
                 case 'FLUSH':
@@ -110,7 +110,7 @@ export class Protocol {
 
                 case 'KEYS': {
                     const keys = this.cache.keys()
-                    return { success: true, data: keys }
+                    return { success: true, data: keys.join(';') }
                 }
 
                 case 'STATS': {
@@ -118,15 +118,20 @@ export class Protocol {
                     return { success: true, data: null }
                 }
 
+                case 'PING': {
+                    return { success: true, data: 'PONG' }
+                }
+
                 case 'QUIT':
                     return { success: true, data: 'QUIT' }
 
                 default:
-                    return { success: false, data: 'ERROR' }
+                    return { success: false, data: null, error: 'Failed to parse command' }
             }
         } catch (error) {
             return {
                 success: false,
+                data: null,
                 error: error instanceof Error ? error.message : 'Unknown error',
             }
         }
@@ -134,21 +139,17 @@ export class Protocol {
 
     format(result: CommandResult): string {
         if (!result.success) {
-            return `ERROR ${result.error}\r\n`
+            return `ERROR ${result.error}`
         }
 
         if (result.data === 'QUIT') {
-            return 'BYE\r\n'
+            return 'BYE'
         }
 
         if (result.data === null) {
-            return 'NOT_FOUND\r\n'
+            return 'NOT_FOUND'
         }
 
-        if (typeof result.data === 'object') {
-            return `VALUE ${JSON.stringify(result.data)}\r\n`
-        }
-
-        return `VALUE ${String(result.data)}\r\n`
+        return result.data
     }
 }
