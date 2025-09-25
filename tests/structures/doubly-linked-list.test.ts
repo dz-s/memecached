@@ -9,9 +9,9 @@ describe('DoublyLinkedList', () => {
     list = new DoublyLinkedList<string, number>()
   })
 
-  const createNode = (key: string, value: number): DoublyLinkedNode<string, number> => ({
+  const createNode = (key: string, item: number): DoublyLinkedNode<string, number> => ({
     key,
-    value,
+    item,
     prev: null,
     next: null
   })
