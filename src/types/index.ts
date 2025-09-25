@@ -1,19 +1,60 @@
 export interface DoublyLinkedNode<K, V> {
   key: K
-  value: V
+  item: V
   prev: DoublyLinkedNode<K, V> | null
   next: DoublyLinkedNode<K, V> | null
 }
 
-export interface CacheStrategy<K> {
-  get(key: K): Uint8Array | undefined
-  set(key: K, value: Uint8Array): void
-  delete(key: K): boolean
-  clear(): void
-  has(key: K): boolean
+export interface CacheEntry<T>{
+    value: T
+    expiresAt: number | null
+}
+
+export interface CacheStrategy<T> {
+  get(key: T): string | null,
+  set(key: T, value: any, ttl: number): boolean,
+  delete(key: T): boolean,
+  clear(): void,
+  has(key: T): boolean,
+  keys(): T[],
   readonly size: number
+}
+
+export interface CleanupProcedure {
+    startCleanupTimer(): void
+    cleanUp(): void
+}
+
+export interface CacheStats {
+    size: number,
+    maxSize: number,
+    hits: number,
+    misses: number,
+    sets: number,
+    deletes: number,
+    evictions: number,
+    hitRate: number
 }
 
 export enum EvictionPolicy {
   LRU = 'LRU'
 }
+
+
+export interface CommandResult {
+  readonly success: boolean
+  readonly data?: unknown
+  readonly error?: string
+}
+
+export type Command<V> = 
+  | { type: 'SET'; key: string; value: V; ttl: number }
+  | { type: 'GET'; key: string }
+  | { type: 'DELETE'; key: string }
+  | { type: 'EXISTS'; key: string }
+  | { type: 'FLUSH' }
+  | { type: 'KEYS' }
+  | { type: 'STATS' }
+  | { type: 'PING' }
+  | { type: 'QUIT' }
+
