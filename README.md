@@ -105,8 +105,7 @@ QUIT               # Close connection
 
 ### **Comprehensive Coverage**
 - **Unit tests** business logic
-- **Integration tests** for protocol handling
-- **TTL functionality** testing
+- **e2e tests** for different scenarious (you can look at the example of report here /e2e-tests/cache_e2e_report.md)
 
 ## 🚀 **Performance Characteristics**
 
